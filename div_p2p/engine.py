@@ -23,12 +23,14 @@ from execo_g5k.planning import get_jobs_specs, get_planning, compute_slots
 
 from div_p2p.test_thread import TestThread
 
+
 class DivEngineException(Exception):
     pass
 
 
 class ParameterException(DivEngineException):
     pass
+
 
 class StatsManager(object):
     """This class manages the statistics of the tests. It is thread-safe."""
@@ -53,7 +55,7 @@ class StatsManager(object):
 
         self.summary_props = []
 
-    def init_summary_files(self, ds_parameters, xp_parameters):
+    def initialize(self, ds_parameters, xp_parameters):
         """Create and write headers of the summary files.
 
         Args:
@@ -87,7 +89,8 @@ class StatsManager(object):
           comb (dict): The combination including the dataset's parameters.
         """
 
-        (ds_class_name, ds_params) = self.engine.comb_manager.get_ds_class_params(comb)
+        (ds_class_name, ds_params) = \
+            self.engine.comb_manager.get_ds_class_params(comb)
 
         line = str(ds_id) + "," + ds_class_name + "," + str(ds_params)
 
@@ -95,7 +98,7 @@ class StatsManager(object):
             self.ds_summary_file.write(line + "\n")
             self.ds_summary_file.flush()
 
-    def add_combination(self, comb_id, comb, out_path):
+    def add_xp(self, comb_id, comb, out_path):
         """Add a new experiment to the statistics.
 
         Args:
@@ -105,7 +108,8 @@ class StatsManager(object):
 
         local_path = os.path.join(self.stats_path, str(comb_id))
 
-        logger.info("Copying stats from comb with id " + str(comb_id) + " to " + local_path)
+        logger.info("Copying stats from comb with id " + str(comb_id) +
+                    " to " + local_path)
         shutil.copyfile(out_path, local_path)
 
         line = str(comb_id)
@@ -125,6 +129,7 @@ class StatsManager(object):
             if self.ds_summary_file:
                 self.ds_summary_file.close()
 
+
 class CombinationManager(object):
     """This class manages the combination of the tests. It is thread-safe in the
     creation of the identifiers. Its sweeper is itself thread-safe."""
@@ -133,7 +138,8 @@ class CombinationManager(object):
         """Create a CombinationManager linked to the given engine.
 
         Args:
-          engine (DivEngine): The engine to which the CombinationManager is linked to.
+          engine (DivEngine): The engine to which the CombinationManager is
+            linked to.
         """
 
         self.__lock = RLock()
@@ -230,9 +236,10 @@ class CombinationManager(object):
         """
 
         for var in self.engine.ds_parameters.keys():
-          if comb1[var] != comb2[var]:
-            return False
+            if comb1[var] != comb2[var]:
+                return False
         return True
+
 
 class DivEngine(Engine):
     """This class manages thw whole workflow of a div_p2p test suite."""
@@ -242,13 +249,15 @@ class DivEngine(Engine):
         super(DivEngine, self).__init__()
 
         # Parameter definition
-        self.options_parser.set_usage("usage: %prog <cluster> <n_nodes> <config_file>")
+        self.options_parser.set_usage(
+            "usage: %prog <cluster> <n_nodes> <config_file>")
         self.options_parser.add_argument("cluster",
                     "The cluster on which to run the experiment")
         self.options_parser.add_argument("n_nodes",
-                    "The number of nodes in which the experiment is going to be deployed")
+                    "The number of nodes in which the experiment is going to be"
+                    " deployed")
         self.options_parser.add_argument("config_file",
-                    "The path of the file containing the test params (INI file)")
+                    "The path of the file containing test params (INI file)")
         self.options_parser.add_option("-k", dest="keep_alive",
                     help="keep reservation alive ..",
                     action="store_true")
@@ -313,7 +322,8 @@ class DivEngine(Engine):
                     if not success:
                         break
                 else:
-                    self.hosts = get_oar_job_nodes(self.oar_job_id, self.frontend)
+                    self.hosts = get_oar_job_nodes(self.oar_job_id,
+                                                   self.frontend)
                 ## SETUP FINISHED
 
                 logger.info("Setup finished in hosts " + str(self.hosts))
@@ -328,7 +338,8 @@ class DivEngine(Engine):
                 for t in test_threads:
                     t.join()
 
-                if get_oar_job_info(self.oar_job_id, self.frontend)['state'] == 'Error':
+                if get_oar_job_info(self.oar_job_id,
+                                    self.frontend)['state'] == 'Error':
                     job_is_dead = True
 
         finally:
@@ -347,7 +358,8 @@ class DivEngine(Engine):
         if config.has_section("test_parameters"):
             test_parameters_names = config.options("test_parameters")
             if "test.stats_path" in test_parameters_names:
-                self.stats_manager.stats_path = config.get("test_parameters", "test.stats_path")
+                self.stats_manager.stats_path = \
+                    config.get("test_parameters", "test.stats_path")
                 if not os.path.exists(self.stats_manager.stats_path):
                     os.makedirs(self.stats_manager.stats_path)
 
@@ -367,10 +379,12 @@ class DivEngine(Engine):
                 self.jar_file = config.get("test_parameters", "test.jar_file")
 
             if "test.remote_dir" in test_parameters_names:
-                self.remote_dir = config.get("test_parameters", "test.remote_dir")
+                self.remote_dir = config.get("test_parameters",
+                                             "test.remote_dir")
 
             if "test.use_kadeploy" in test_parameters_names:
-                self.use_kadeploy = config.getboolean("test_parameters", "test.use_kadeploy")
+                self.use_kadeploy = config.getboolean("test_parameters",
+                                                      "test.use_kadeploy")
 
             if self.use_kadeploy:
                 if "test.kadeploy.env_file" in test_parameters_names:
@@ -380,8 +394,11 @@ class DivEngine(Engine):
                     self.kadeploy_env_name = \
                         config.get("test_parameters", "test.kadeploy.env_name")
                 else:
-                    logger.error("Either test.kadeploy.env_file or test.kadeploy.env_name should be specified")
-                    raise ParameterException("Either test.kadeploy.env_file or test.kadeploy.env_name should be specified")
+                    logger.error("Either test.kadeploy.env_file or "
+                                 "test.kadeploy.env_name should be specified")
+                    raise ParameterException("Either test.kadeploy.env_file or "
+                                             "test.kadeploy.env_name should be "
+                                             "specified")
 
     def __define_ds_parameters(self, config):
         ds_parameters_names = config.options("ds_parameters")
@@ -409,8 +426,10 @@ class DivEngine(Engine):
                 elif len(pv) == 1:
                     this_ds_params[pn] = pv[0]
                 else:
-                    logger.error("Number of ds_class does not much number of " + pn)
-                    raise ParameterException("Number of ds_class does not much number of " + pn)
+                    logger.error("Number of ds_class does not much number of " +
+                                 pn)
+                    raise ParameterException("Number of ds_class does not much "
+                                             "number of " + pn)
 
             self.ds_config.append((ds_class, this_ds_params))
 
@@ -441,7 +460,7 @@ class DivEngine(Engine):
         self.parameters.update(self.xp_parameters)
 
         # SUMMARY FILES
-        self.stats_manager.init_summary_files(self.ds_parameters, self.xp_parameters)
+        self.stats_manager.initialize(self.ds_parameters, self.xp_parameters)
 
         # PRINT PARAMETERS
         print_ds_parameters = {}
@@ -463,10 +482,12 @@ class DivEngine(Engine):
         """Perform a reservation of the required number of nodes."""
 
         logger.info('Performing reservation')
-        now = int(time.time() + timedelta_to_seconds(datetime.timedelta(minutes=1)))
+        now = int(time.time() +
+                  timedelta_to_seconds(datetime.timedelta(minutes=1)))
         starttime = now
-        endtime = int(starttime + timedelta_to_seconds(datetime.timedelta(days=3,
-                                                                 minutes=1)))
+        endtime = int(starttime +
+                      timedelta_to_seconds(datetime.timedelta(days=3,
+                                                              minutes=1)))
         startdate, n_nodes = self._get_nodes(starttime, endtime)
 
         search_time = 3 * 24 * 60 * 60  # 3 days
@@ -478,12 +499,13 @@ class DivEngine(Engine):
             logger.info('Not enough nodes found between %s and %s, ' +
                         'increasing time window',
                         format_date(starttime), format_date(endtime))
-            starttime = max(now, now + iteration * search_time - walltime_seconds)
+            starttime = max(now, now +
+                            iteration * search_time - walltime_seconds)
             endtime = int(now + (iteration + 1) * search_time)
 
             startdate, n_nodes = self._get_nodes(starttime, endtime)
             if starttime > int(time.time() + timedelta_to_seconds(
-                                            datetime.timedelta(weeks=6))):
+                    datetime.timedelta(weeks=6))):
                 logger.error('There are not enough nodes on %s for your ' +
                              'experiments, abort ...', self.cluster)
                 exit()
@@ -498,7 +520,8 @@ class DivEngine(Engine):
             sub.additional_options = '-t allow_classic_ssh'
         sub.reservation_date = startdate
         (self.oar_job_id, self.frontend) = oarsub(jobs_specs)[0]
-        logger.info('Startdate: %s, n_nodes: %s, job_id: %s', format_date(startdate),
+        logger.info('Startdate: %s, n_nodes: %s, job_id: %s',
+                    format_date(startdate),
                     str(n_nodes), str(self.oar_job_id))
 
     def _get_nodes(self, starttime, endtime):
@@ -558,7 +581,8 @@ class DivEngine(Engine):
             deployment = Deployment(self.hosts, env_name=self.kadeploy_env_name)
         else:
             logger.error("Neither env_file nor env_name are specified")
-            raise ParameterException("Neither env_file nor env_name are specified")
+            raise ParameterException("Neither env_file nor env_name are "
+                                     "specified")
 
         (deployed, undeployed) = deploy(
             deployment,

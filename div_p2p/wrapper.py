@@ -6,8 +6,12 @@ from execo.process import SshProcess
 
 
 class DivP2PWrapper:
+    """This class manages the properties and execution of diversity_p2p tests.
+    """
 
-    def __init__(self, host, remote_dir="/tmp", jar_path="/tmp/diversity_p2p.jar"):
+    def __init__(self, host,
+                 remote_dir="/tmp",
+                 jar_path="/tmp/diversity_p2p.jar"):
         self.host = host
         self.remote_dir = remote_dir
         self.jar_path = jar_path

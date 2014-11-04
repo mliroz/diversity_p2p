@@ -7,6 +7,7 @@ from div_p2p.wrapper import DivP2PWrapper
 
 
 class TestThread(Thread):
+    """This class manages the consumption and execution of combinations."""
 
     def __init__(self, host, comb_manager, stats_manager):
         super(TestThread, self).__init__()
@@ -15,6 +16,10 @@ class TestThread(Thread):
 
         self.comb_manager = comb_manager
         self.stats_manager = stats_manager
+
+        self.comb = None
+        self.ds_id = -1
+        self.comb_id = -1
 
     def _th_prefix(self):
         return style.user1("[" + self.name + "] ")
@@ -76,11 +81,10 @@ class TestThread(Thread):
         (ds_class_name, ds_params) = self.comb_manager.get_ds_class_params(comb)
 
         local_path = ds_params["local_path"]
-        remote_path = os.path.join(self.div_p2p.remote_dir, os.path.basename(local_path))
+        remote_path = os.path.join(self.div_p2p.remote_dir,
+                                   os.path.basename(local_path))
 
-        ds_comb = {}
-        ds_comb["ds.class.path"] = remote_path
-        ds_comb["ds.class"] = ds_class_name
+        ds_comb = {"ds.class.path": remote_path, "ds.class": ds_class_name}
 
         # Copy dataset to host
         logger.info(self._th_prefix() + "Prepare dataset with combination " +
@@ -104,7 +108,8 @@ class TestThread(Thread):
 
         comb_ok = False
         try:
-            logger.info(self._th_prefix() + "Execute experiment with combination " +
+            logger.info(self._th_prefix() +
+                        "Execute experiment with combination " +
                         str(self.comb_manager.get_xp_parameters(comb)))
 
             num_reps = self.comb_manager.get_num_repetitions()
@@ -125,7 +130,7 @@ class TestThread(Thread):
                 stats_file = self.div_p2p.execute()
 
                 # Notify stats manager
-                self.stats_manager.add_combination(self.comb_id, comb, stats_file)
+                self.stats_manager.add_xp(self.comb_id, comb, stats_file)
 
             comb_ok = True
 
@@ -134,4 +139,5 @@ class TestThread(Thread):
                 self.comb_manager.sweeper.done(comb)
             else:
                 self.comb_manager.sweeper.cancel(comb)
-            logger.info('%s Remaining', len(self.comb_manager.sweeper.get_remaining()))
+            logger.info('%s Remaining',
+                        len(self.comb_manager.sweeper.get_remaining()))
