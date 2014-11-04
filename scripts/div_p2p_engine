@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+from div_p2p.engine import DivEngine
+
+if __name__ == "__main__":
+    engine = DivEngine()
+    engine.start()
