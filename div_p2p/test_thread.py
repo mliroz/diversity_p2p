@@ -1,7 +1,7 @@
 import os
 from threading import Thread
 from execo.action import TaktukPut
-
+from execo.log import style
 from execo_engine import logger
 from div_p2p.wrapper import DivP2PWrapper
 
@@ -15,6 +15,9 @@ class TestThread(Thread):
 
         self.comb_manager = comb_manager
         self.stats_manager = stats_manager
+
+    def _th_prefix(self):
+        return style.user1("[" + self.name + "] ")
 
     def run(self):
 
@@ -80,7 +83,7 @@ class TestThread(Thread):
         ds_comb["ds.class"] = ds_class_name
 
         # Copy dataset to host
-        logger.info("Prepare dataset with combination " +
+        logger.info(self._th_prefix() + "Prepare dataset with combination " +
                     str(self.comb_manager.get_ds_parameters(comb)))
 
         copy_code = TaktukPut([self.div_p2p.host], [local_path], remote_path)
@@ -101,12 +104,14 @@ class TestThread(Thread):
 
         comb_ok = False
         try:
-            logger.info("Execute experiment with combination " +
+            logger.info(self._th_prefix() + "Execute experiment with combination " +
                         str(self.comb_manager.get_xp_parameters(comb)))
 
-            for nr in range(0, self.comb_manager.get_num_repetitions()):
+            num_reps = self.comb_manager.get_num_repetitions()
+            for nr in range(0, num_reps):
 
-                logger.info("Repetition " + str(nr + 1))
+                if num_reps > 1:
+                    logger.info(self._th_prefix() + "Repetition " + str(nr + 1))
 
                 # Change configuration
                 params = {}

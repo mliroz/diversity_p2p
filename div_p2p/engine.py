@@ -105,7 +105,7 @@ class StatsManager(object):
 
         local_path = os.path.join(self.stats_path, str(comb_id))
 
-        logger.info("Copying stats to " + local_path)
+        logger.info("Copying stats from comb with id " + str(comb_id) + " to " + local_path)
         shutil.copyfile(out_path, local_path)
 
         line = str(comb_id)
@@ -322,6 +322,7 @@ class DivEngine(Engine):
                 for h in self.hosts:
                     t = TestThread(h, self.comb_manager, self.stats_manager)
                     test_threads.append(t)
+                    t.name = "th_" + str(h.address).split(".")[0]
                     t.start()
 
                 for t in test_threads:
