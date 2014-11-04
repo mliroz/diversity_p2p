@@ -73,8 +73,7 @@ class TestThread(Thread):
         (ds_class_name, ds_params) = self.comb_manager.get_ds_class_params(comb)
 
         local_path = ds_params["local_path"]
-        remote_relative_path = ds_params["remote_path"]
-        remote_path = os.path.join(self.div_p2p.remote_dir, remote_relative_path, os.path.basename(local_path))
+        remote_path = os.path.join(self.div_p2p.remote_dir, os.path.basename(local_path))
 
         ds_comb = {}
         ds_comb["ds.class.path"] = remote_path

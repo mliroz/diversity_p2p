@@ -274,7 +274,7 @@ class DivEngine(Engine):
         self.kadeploy_env_name = None
 
         self.jar_file = None
-        self.remote_dir = "/tmp" #TODO
+        self.remote_dir = "/tmp"
 
     def run(self):
         """Inherited method, put here the code for running the engine."""
