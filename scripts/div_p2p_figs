@@ -1,0 +1,155 @@
+#!/usr/bin/env python
+
+import json
+import os
+import sys
+from stats.data import get_varying_combinations, FigureLines
+from stats.gnuplot import GnuPlotGenerator
+
+
+def convert_number(string):
+    try:
+        return int(string)
+    except ValueError:
+        pass
+    try:
+        return float(string)
+    except ValueError:
+        return string
+
+def insert_ds_information(params_headers, params_values, summary_ds_file):
+
+    ds_params_file = open(summary_ds_file)
+    ds_params_header = [k.strip() for k in ds_params_file.readline().split(",")]
+
+    ds_id_key_idx = ds_params_header.index("ds_id")
+    xp_ds_id_key_idx = params_headers.index("ds.config")
+
+    # Read datasets
+    index_ds_id = {}
+    ds_rows = []
+    idx = 0
+    for line in ds_params_file:
+        row = [convert_number(v.strip()) for v in line.split(",")]
+        ds_rows.append(row)
+        index_ds_id[row[ds_id_key_idx]] = idx
+        idx += 1
+    ds_params_file.close()
+
+    #TODO: hardcoded: make general?
+    # Replace ds.config by dataset variables
+    params_headers[xp_ds_id_key_idx:xp_ds_id_key_idx+1] = ["dataset"]
+    dataset_idx = ds_params_header.index("ds_class_properties")
+
+    for row in params_values:
+        ds_row = ds_rows[index_ds_id[row[xp_ds_id_key_idx]]]
+        ds_class_props = {}
+        ds_class_props_str = "ds_class_props = " + ds_row[dataset_idx]
+        exec ds_class_props_str
+        row[xp_ds_id_key_idx:xp_ds_id_key_idx+1] = [os.path.basename(ds_class_props["local_path"])]
+
+
+if __name__ == "__main__":
+
+    # Get parameters
+    conf_file_name = str(sys.argv[1])
+
+    if not os.path.exists(conf_file_name):
+        #logger.error("Configuration file " + conf_file + " does not exist.")
+        print "Configuration file " + conf_file_name + " does not exist."
+        sys.exit(-1)
+
+    # Load json
+    conf_file = open(conf_file_name)
+    fig_props = json.load(conf_file)
+    conf_file.close()
+
+    summary_xp_file = fig_props["summary_xp"]
+    summary_ds_file = fig_props["summary_ds"]
+    stats_dir = fig_props["stats_dir"]
+
+    # Checks
+    if not os.path.exists(summary_xp_file):
+        #logger.error(summary_xp_file + " does not exist")
+        print summary_xp_file + " does not exist"
+    if not os.path.exists(summary_ds_file):
+        print summary_ds_file + " does not exist"
+    if not os.path.exists(stats_dir):
+        print stats_dir + " does not exist"
+
+    # Get data from experiments
+    xp_params_file = open(summary_xp_file)
+    params_headers = [k.strip() for k in xp_params_file.readline().split(",")]
+    params_values = []
+    for line in xp_params_file:
+        params_values.append([convert_number(v.strip()) for v in line.split(",")])
+    xp_params_file.close()
+
+    # Add ds data
+    insert_ds_information(params_headers, params_values, summary_ds_file)
+
+    # Retrieve xps stats
+    metrics_headers = None
+    metrics_values = []
+    comb_id_idx = params_headers.index("comb_id")
+    for row in params_values:
+        comb_id = row[comb_id_idx]
+
+        # Read stats file and add row to values
+        stats_file = open(os.path.join(stats_dir,str(comb_id)))
+        if not metrics_headers:
+            metrics_headers = [key.strip() for key in stats_file.readline().split(",")]
+        for line in stats_file:
+            pass
+        metrics_values.append([convert_number(v.strip()) for v in line.split(",")])
+        stats_file.close()
+
+    # Generate figures
+    for idx, fig in enumerate(fig_props["figs"]):
+
+        # Get variables
+        x_var = fig["x_var"]
+        y_var = fig["y_var"]
+        type = fig["type"]
+        if "varying" in fig:
+            varying = fig["varying"]
+        else :
+            varying = []
+        if "ignore" in fig:
+            ignore = fig["ignore"]
+        else :
+            ignore = []
+        if "title" in fig:
+            title = fig["title"]
+        else:
+            title = None
+
+        generator = GnuPlotGenerator()
+
+        (varying_keys, varying_values, varying_combinations) = \
+            get_varying_combinations(params_headers, params_values,
+                                     ["comb_id", x_var] + varying)
+
+        print "varying_keys",varying_keys
+
+        for comb in varying_combinations:
+            fixed_vars = {}
+            for idx, key in enumerate(varying_keys):
+                fixed_vars[key] = comb[idx]
+
+            fig_lines = FigureLines(params_headers, params_values,
+                                    metrics_headers, metrics_values,
+                                    x_var, y_var, fixed_vars, ["comb_id"])
+
+            print fig_lines
+            print "----------------------------------------------------------"
+
+            """
+            generator.draw_figure(fig_lines, "fig" + str(idx) +
+                                  "_".join([str(v) for v in comb]) + ".png",
+                                  title)
+            """
+
+
+
+
