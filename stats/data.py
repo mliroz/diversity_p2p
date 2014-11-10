@@ -138,6 +138,10 @@ class FigureLines:
         self.lines_params = lines_params
         self.lines_values = lines_values
 
+        # Sort line values by x_var
+        for row in lines_values:
+            row.sort()
+
 
     def __str__(self):
 
