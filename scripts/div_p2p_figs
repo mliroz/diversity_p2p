@@ -105,7 +105,7 @@ if __name__ == "__main__":
         stats_file.close()
 
     # Generate figures
-    for idx, fig in enumerate(fig_props["figs"]):
+    for fig_idx, fig in enumerate(fig_props["figs"]):
 
         # Get variables
         x_var = fig["x_var"]
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
         print "varying_keys",varying_keys
 
-        for comb in varying_combinations:
+        for comb_idx, comb in enumerate(varying_combinations):
             fixed_vars = {}
             for idx, key in enumerate(varying_keys):
                 fixed_vars[key] = comb[idx]
@@ -144,12 +144,8 @@ if __name__ == "__main__":
             print fig_lines
             print "----------------------------------------------------------"
 
-            """
-            generator.draw_figure(fig_lines, "fig" + str(idx) +
-                                  "_".join([str(v) for v in comb]) + ".png",
-                                  title)
-            """
+            base_name = "fig" + str(fig_idx) + "_" + "_".join([str(v) for v in comb])
+            fig_name = base_name + ".png"
+            script_dir = "fig" + str(fig_idx) + "_" + str(comb_idx)
 
-
-
-
+            generator.draw_figure(fig_lines, fig_name, title, script_dir)
