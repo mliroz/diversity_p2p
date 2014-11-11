@@ -55,6 +55,8 @@ class StatsManager(object):
 
         self.summary_props = []
 
+        self.printed_dss = []
+
     def initialize(self, ds_parameters, xp_parameters):
         """Create and write headers of the summary files.
 
@@ -89,14 +91,19 @@ class StatsManager(object):
           comb (dict): The combination including the dataset's parameters.
         """
 
-        (ds_class_name, ds_params) = \
-            self.engine.comb_manager.get_ds_class_params(comb)
+        if not ds_id in self.printed_dss:
 
-        line = str(ds_id) + "," + ds_class_name + "," + str(ds_params)
+            (ds_class_name, ds_params) = \
+                self.engine.comb_manager.get_ds_class_params(comb)
 
-        with self.__lock:
-            self.ds_summary_file.write(line + "\n")
-            self.ds_summary_file.flush()
+            line = str(ds_id) + "," + ds_class_name + "," + str(ds_params)
+
+            with self.__lock:
+                if not ds_id in self.printed_dss:
+                    self.ds_summary_file.write(line + "\n")
+                    self.ds_summary_file.flush()
+
+                    self.printed_dss.append(ds_id)
 
     def add_xp(self, comb_id, comb, out_path):
         """Add a new experiment to the statistics.
@@ -184,10 +191,7 @@ class CombinationManager(object):
         Returns:
           int: the combination identifier.
         """
-        with self.__lock:
-            ds_id = self.ds_id
-            self.ds_id += 1
-        return ds_id
+        return comb["ds.config"]
 
     def get_ds_parameters(self, params):
         """Return the params and values referring to the dataset.
