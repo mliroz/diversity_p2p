@@ -17,6 +17,7 @@ def convert_number(string):
     except ValueError:
         return string
 
+
 def insert_ds_information(params_headers, params_values, summary_ds_file):
 
     ds_params_file = open(summary_ds_file)
@@ -46,7 +47,8 @@ def insert_ds_information(params_headers, params_values, summary_ds_file):
         ds_class_props = {}
         ds_class_props_str = "ds_class_props = " + ds_row[dataset_idx]
         exec ds_class_props_str
-        row[xp_ds_id_key_idx:xp_ds_id_key_idx+1] = [os.path.basename(ds_class_props["local_path"])]
+        row[xp_ds_id_key_idx:xp_ds_id_key_idx+1] = \
+            [os.path.basename(ds_class_props["local_path"])]
 
 
 if __name__ == "__main__":
@@ -96,7 +98,7 @@ if __name__ == "__main__":
         comb_id = row[comb_id_idx]
 
         # Read stats file and add row to values
-        stats_file = open(os.path.join(stats_dir,str(comb_id)))
+        stats_file = open(os.path.join(stats_dir, str(comb_id)))
         if not metrics_headers:
             metrics_headers = [key.strip() for key in stats_file.readline().split(",")]
         for line in stats_file:
@@ -110,14 +112,14 @@ if __name__ == "__main__":
         # Get variables
         x_var = fig["x_var"]
         y_var = fig["y_var"]
-        type = fig["type"]
+        fig_type = fig["type"]
         if "varying" in fig:
             varying = fig["varying"]
-        else :
+        else:
             varying = []
         if "ignore" in fig:
             ignore = fig["ignore"]
-        else :
+        else:
             ignore = []
         if "title" in fig:
             title = fig["title"]
@@ -130,7 +132,7 @@ if __name__ == "__main__":
             get_varying_combinations(params_headers, params_values,
                                      ["comb_id", x_var] + varying)
 
-        print "varying_keys",varying_keys
+        print "varying_keys", varying_keys
 
         for comb_idx, comb in enumerate(varying_combinations):
             fixed_vars = {}

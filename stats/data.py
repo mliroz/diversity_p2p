@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABCMeta
 
+
 def get_varying_combinations(params_headers, params_values, ignored_keys):
 
     # Index keys
@@ -10,7 +11,7 @@ def get_varying_combinations(params_headers, params_values, ignored_keys):
     # Get varying keys
     varying_keys = [key for key in params_headers if key not in ignored_keys]
     varying_values = []
-    for key in varying_keys[:]: # Slice to allow removal during iteration
+    for key in varying_keys[:]:  # Slice to allow removal during iteration
         key_idx = params_idx[key]
         values = set([])
         for row in params_values:
@@ -25,7 +26,7 @@ def get_varying_combinations(params_headers, params_values, ignored_keys):
     varying_combinations = set([])
     for row in params_values:
         comb = tuple([row[idx] for idx in varying_keys_idxs])
-        if not comb in  varying_combinations:
+        if not comb in varying_combinations:
             varying_combinations.add(comb)
 
     return (varying_keys, varying_values, varying_combinations)
@@ -97,7 +98,7 @@ class FigureLines:
         varying_values = []
         non_varying_keys = []
         non_varying_values = []
-        for key in varying_keys[:]: # Slice to allow removal during iteration
+        for key in varying_keys[:]:  # Slice to allow removal during iteration
             key_idx = params_idx[key]
             values = set([])
             for row_idx in kept_idxs:
@@ -142,7 +143,6 @@ class FigureLines:
         for row in lines_values:
             row.sort()
 
-
     def __str__(self):
 
         out = ""
@@ -175,46 +175,3 @@ class FigureGenerator(object):
     @abstractmethod
     def draw_figure(self, figure_lines, out_file, title=None):
         pass
-
-if __name__ == "__main__":
-
-    params_headers = ["b", "c", "d", "e"]
-    params_values = [[1, 0, "v1", "w2"],
-                     [2, 0, "v1", "w2"],
-                     [3, 0, "v1", "w2"],
-                     [4, 0, "v1", "w2"],
-                     [1, 1, "v1", "w2"],
-                     [2, 1, "v1", "w2"],
-                     [3, 1, "v1", "w2"],
-                     [1, 1, "v1", "w0"],
-                     [2, 1, "v1", "w0"],
-                     [3, 1, "v1", "w0"]]
-
-    metrics_headers = ["m1", "m2"]
-    metrics_values = [[1,  2],
-                      [2,  4],
-                      [3,  6],
-                      [4,  8],
-                      [1,  3],
-                      [2,  6],
-                      [3,  9],
-                      [1,  3],
-                      [2,  6],
-                      [3,  9]]
-
-    x_var = "b"
-    y_var = "m1"
-
-    fls = FigureLines(params_headers, params_values,
-                            metrics_headers, metrics_values,
-                            x_var, y_var, {"e": "w0"})
-
-    print "fls",fls
-    print "-------------"
-
-    y_var = "m2"
-    fls = FigureLines(params_headers, params_values,
-                      metrics_headers, metrics_values,
-                      x_var, y_var)
-
-    print fls
