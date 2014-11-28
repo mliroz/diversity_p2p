@@ -6,7 +6,7 @@ setup (
   name = "div_p2p",
   version = "0.2",
 
-  packages = ["div_p2p"],
+  packages = ["div_p2p", "stats"],
   scripts = ["scripts/div_p2p_engine", "scripts/div_p2p_figs"],
 
   install_requires=["execo"],
