@@ -148,18 +148,18 @@ class FigureLines:
         out = ""
 
         assigs = []
-        for idx, key in enumerate(self.fixed_keys):
-            assigs.append(str(key) + " = " + str(self.fixed_values[idx]))
+        for key, value in zip(self.fixed_keys, self.fixed_values):
+            assigs.append(str(key) + " = " + str(value))
         out += "fixed_params: " + ", ".join(assigs) + "\n"
 
         assigs = []
-        for idx, key in enumerate(self.varying_keys):
-            assigs.append(str(key) + " = " + str(self.varying_values[idx]))
+        for key, value in zip(self.varying_keys, self.varying_values):
+            assigs.append(str(key) + " = " + str(value))
         out += "varying_params: " + ", ".join(assigs) + "\n"
 
         assigs = []
-        for idx, key in enumerate(self.non_varying_keys):
-            assigs.append(str(key) + " = " + str(self.non_varying_values[idx]))
+        for key, value in zip(self.non_varying_keys, self.non_varying_values):
+            assigs.append(str(key) + " = " + str(value))
         out += "non_varying_params: " + ", ".join(assigs) + "\n"
         out += "x_var: " + str(self.x_var) + "\n"
         out += "y_var: " + str(self.y_var) + "\n"

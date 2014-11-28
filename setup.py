@@ -4,10 +4,10 @@ from setuptools import setup, find_packages
 
 setup (
   name = "div_p2p",
-  version = "0.1",
+  version = "0.2",
 
   packages = ["div_p2p"],
-  scripts = ["scripts/div_p2p_engine"],
+  scripts = ["scripts/div_p2p_engine", "scripts/div_p2p_figs"],
 
   install_requires=["execo"],
 

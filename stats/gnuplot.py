@@ -55,8 +55,8 @@ class GnuPlotGenerator(FigureGenerator):
                 data_out.write(" ".join(str(x) for x in row) + "\n")
             data_out.close()
 
-            line_title = ", ".join(key + "=" + str(line_params[idx])
-                                   for idx, key in enumerate(figure_lines.varying_keys))
+            line_title = ", ".join(key + "=" + str(val)
+                                   for key, val in zip(figure_lines.varying_keys, line_params))
 
             plot_lines.append("'" + data_file + "' u 1:2 w lp title \"" + line_title + "\"")
 
