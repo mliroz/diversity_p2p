@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+from stats.csv import CsvGenerator
 from stats.data import get_varying_combinations, FigureLines
 from stats.gnuplot import GnuPlotGenerator
 
@@ -70,6 +71,14 @@ if __name__ == "__main__":
     summary_ds_file = fig_props["summary_ds"]
     stats_dir = fig_props["stats_dir"]
 
+    if fig_props["generator"] == "gnuplot":
+        generator = GnuPlotGenerator()
+    elif fig_props["generator"] == "csv":
+        generator = CsvGenerator()
+    else:
+        print "Unknown generator"
+        sys.exit(-1)
+
     # Checks
     if not os.path.exists(summary_xp_file):
         #logger.error(summary_xp_file + " does not exist")
@@ -126,8 +135,6 @@ if __name__ == "__main__":
         else:
             title = None
 
-        generator = GnuPlotGenerator()
-
         (varying_keys, varying_values, varying_combinations) = \
             get_varying_combinations(params_headers, params_values,
                                      ["comb_id", x_var] + varying)
@@ -147,7 +154,4 @@ if __name__ == "__main__":
             print "----------------------------------------------------------"
 
             base_name = "fig" + str(fig_idx) + "_" + "_".join([str(v) for v in comb])
-            fig_name = base_name + ".png"
-            script_dir = "fig" + str(fig_idx) + "_" + str(comb_idx)
-
-            generator.draw_figure(fig_lines, fig_name, title, script_dir)
+            generator.draw_figure(fig_lines, base_name, title)
