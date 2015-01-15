@@ -117,7 +117,7 @@ class StatsManager(object):
 
         logger.info("Copying stats from comb with id " + str(comb_id) +
                     " to " + local_path)
-        shutil.copyfile(out_path, local_path)
+        shutil.move(out_path, local_path)
 
         line = str(comb_id)
         for pn in self.summary_props:

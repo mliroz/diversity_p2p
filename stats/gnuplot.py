@@ -1,11 +1,7 @@
 import os
-import tempfile
 from stats.data import FigureGenerator
 
 from subprocess import call
-
-#TMP_DIR = r"C:\Users\su40274\Desktop\test\tmp"
-TMP_DIR = "/tmp"
 
 #GNUPLOT_HOME = r'C:\Program Files (x86)\gnuplot\bin\gnuplot.exe'
 GNUPLOT_HOME = "/usr/bin/gnuplot"
